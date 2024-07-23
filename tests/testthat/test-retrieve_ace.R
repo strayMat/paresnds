@@ -10,7 +10,7 @@ test_that("retrieve_ace works", {
     ETA_NUM = c(20, 20, 20),
     SEQ_NUM = c(31, 32, 33),
     NIR_ANO_17 = c(11, 12, 13),
-    EXE_SOI_DTD = c("2019-01-10", "2019-01-02", "2019-01-03")
+    EXE_SOI_DTD = as.Date(c("2019-01-10", "2019-01-02", "2019-01-03"))
   )
   fake_fcstc_table <- data.frame(
     ETA_NUM = c(20, 20, 20),
@@ -37,13 +37,12 @@ test_that("retrieve_ace works", {
     conn = conn
   )
 
+  DBI::dbDisconnect(conn)
   expect_equal(consultations, structure(list(BEN_IDT_ANO = c(
     1,
     2
-  ), EXE_SOI_DTD = c("2019-01-10", "2019-01-02"), ACT_COD = c(
+  ), EXE_SOI_DTD = as.Date(c("2019-01-10", "2019-01-02")), ACT_COD = c(
     "C",
     "CS"
   ), EXE_SPE = c("01", "22")), class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -2L)))
-
-  DBI::dbDisconnect(conn)
 })

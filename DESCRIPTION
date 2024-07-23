@@ -11,7 +11,8 @@ Imports:
     haven,
     here,
     lubridate,
-    stringr
+    stringr,
+    duckdb (>= 1.0.0.2)
 Authors@R: c(
     person(
         "Antoine", "Belloir", ,

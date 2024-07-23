@@ -15,8 +15,8 @@ initialize_connection <- function() {
     Sys.setenv(TZ = "Europe/Paris")
     Sys.setenv(ORA_SDTZ = "Europe/Paris")
   } else{
-    print("Le code ne s'exécute pas sur le portail CNAM. Initialisation d'une connexion sqlite.")
-    conn <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+    print("Le code ne s'exécute pas sur le portail CNAM. Initialisation d'une connexion duckdb en mémoire.")
+    conn <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
   }
 
   return(conn)
@@ -33,14 +33,14 @@ create_table_from_query <- function(
     conn = NULL,
     output_table_name = NULL,
     query = NULL) {
-  query <- sql_render(query)
+  query <- dbplyr::sql_render(query)
   temp_table_name <- paste0(output_table_name, "_TMP")
-  dbExecute(conn, glue("CREATE TABLE {temp_table_name} AS {query}"))
-  if (dbExistsTable(conn, output_table_name)) {
-    dbRemoveTable(conn, output_table_name)
+  DBI::dbExecute(conn, glue::glue("CREATE TABLE {temp_table_name} AS {query}"))
+  if (DBI::dbExistsTable(conn, output_table_name)) {
+    DBI::dbRemoveTable(conn, output_table_name)
   }
-  dbExecute(conn, glue("CREATE TABLE {output_table_name} AS SELECT * FROM {temp_table_name}"))
-  dbRemoveTable(conn, temp_table_name)
+  DBI::dbExecute(conn, glue::glue("CREATE TABLE {output_table_name} AS SELECT * FROM {temp_table_name}"))
+  DBI::dbRemoveTable(conn, temp_table_name)
 }
 
 #' Création d'une table à partir d'une requête SQL ou insertion des résultats dans une table existante.

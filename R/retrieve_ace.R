@@ -1,13 +1,3 @@
-# library(ROracle)
-# library(dplyr)
-# library(dbplyr)
-# library(DBI)
-# library(glue)
-# library(lubridate)
-# source("~/sasdata1/park/retrieve/utils.R")
-
-
-
 #' Extrait les consultations externes à l'hôpital.
 #'
 #' - Sélectionne les codes prestations (ACT_COD) parmi : C et CS.
@@ -57,8 +47,7 @@ extract_hospital_consultations <- function(
       distinct()
 
     date_condition <- glue::glue(
-      "EXE_SOI_DTD <= DATE({formatted_end_date}')
-      \ AND EXE_SOI_DTD >= DATE('{formatted_start_date}')"
+      "EXE_SOI_DTD <= DATE '{formatted_end_date}' AND EXE_SOI_DTD >= DATE '{formatted_start_date}'"
     )
     ace <- cstc %>%
       select(ETA_NUM, SEQ_NUM, NIR_ANO_17, EXE_SOI_DTD) %>%
