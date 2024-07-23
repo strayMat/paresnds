@@ -1,12 +1,24 @@
 #' Initialisation de la connexion à la base de données.
-#' @return Connexion à la base de données
+#'
+#' Si le code s'exécute en dehors du portail, initie une connexion sqlite pour
+#' effectuer les tests.
+#'
+#' @return dbConnection Connexion à la base de données oracle
 #'
 #' @export
 initialize_connection <- function() {
-  drv <- dbDriver("Oracle")
-  conn <- dbConnect(drv, dbname = "IPIAMPR2.WORLD")
-  Sys.setenv(TZ = "Europe/Paris")
-  Sys.setenv(ORA_SDTZ = "Europe/Paris")
+
+  # Teste que l'on est sur le portail.
+  if (file.exists("~/sasdata1")){
+    drv <- DBI::dbDriver("Oracle")
+    conn <- DBI::dbConnect(drv, dbname = "IPIAMPR2.WORLD")
+    Sys.setenv(TZ = "Europe/Paris")
+    Sys.setenv(ORA_SDTZ = "Europe/Paris")
+  } else{
+    print("Le code ne s'exécute pas sur le portail CNAM. Initialisation d'une connexion sqlite.")
+    conn <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+  }
+
   return(conn)
 }
 
@@ -42,11 +54,11 @@ create_table_or_insert_from_query <- function(
     conn = NULL,
     output_table_name = NULL,
     query = NULL) {
-  query <- sql_render(query)
-  if (dbExistsTable(conn, output_table_name)) {
-    dbExecute(conn, glue("INSERT INTO {output_table_name} {query}"))
+  query <- dbplyr::sql_render(query)
+  if (DBI::dbExistsTable(conn, output_table_name)) {
+    DBI::dbExecute(conn, glue::glue("INSERT INTO {output_table_name} {query}"))
   } else {
-    dbExecute(conn, glue("CREATE TABLE {output_table_name} AS {query}"))
+    DBI::dbExecute(conn, glue::glue("CREATE TABLE {output_table_name} AS {query}"))
   }
 }
 

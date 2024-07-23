@@ -29,8 +29,10 @@ extract_hospital_consultations <- function(
     spe_codes = NULL,
     ben_table_name = NULL,
     output_table_name = NULL,
-    r_output_path = NULL) {
-  conn <- initialize_connection() # Connect to database
+    conn = NULL) {
+  if (is.null((conn))) {
+    conn <- initialize_connection() # Connect to database
+  }
 
   consultation_act_codes <- c("C", "CS")
 
@@ -38,25 +40,31 @@ extract_hospital_consultations <- function(
   end_year <- lubridate::year(end_date)
   formatted_start_date <- format(start_date, "%Y-%m-%d")
   formatted_end_date <- format(end_date, "%Y-%m-%d")
+  typed_start_date <- as.Date(start_date)
+  typed_end_date <- as.Date(end_date)
 
   for (year in start_year:end_year) {
     start_time <- Sys.time()
-    print(glue("Processing year: {year}"))
+    print(glue::glue("Processing year: {year}"))
     formatted_year <- sprintf("%02d", year %% 100)
 
-    ben <- tbl(conn, ben_table_name)
-    cstc <- tbl(conn, glue("T_MCO{formatted_year}CSTC"))
-    fcstc <- tbl(conn, glue("T_MCO{formatted_year}FCSTC"))
+    ben <- dplyr::tbl(conn, ben_table_name)
+    cstc <- dplyr::tbl(conn, glue::glue("T_MCO{formatted_year}CSTC"))
+    fcstc <- dplyr::tbl(conn, glue::glue("T_MCO{formatted_year}FCSTC"))
 
     fcstc <- fcstc %>%
       select(ETA_NUM, SEQ_NUM, ACT_COD, EXE_SPE) %>%
       distinct()
 
+    date_condition <- glue::glue(
+      "EXE_SOI_DTD <= DATE({formatted_end_date}')
+      \ AND EXE_SOI_DTD >= DATE('{formatted_start_date}')"
+    )
     ace <- cstc %>%
       select(ETA_NUM, SEQ_NUM, NIR_ANO_17, EXE_SOI_DTD) %>%
       distinct() %>%
-      filter(EXE_SOI_DTD >= TO_DATE(formatted_start_date, "YYYY-MM-DD") &
-        EXE_SOI_DTD <= TO_DATE(formatted_end_date, "YYYY-MM-DD")) %>%
+      filter(sql(date_condition))
+    ace <- ace %>%
       left_join(fcstc, by = c("ETA_NUM", "SEQ_NUM")) %>%
       select(NIR_ANO_17, EXE_SOI_DTD, ACT_COD, EXE_SPE) %>%
       filter(ACT_COD %in% consultation_act_codes) %>%
@@ -79,15 +87,12 @@ extract_hospital_consultations <- function(
     create_table_or_insert_from_query(conn = conn, output_table_name = output_table_name, query = query)
 
     end_time <- Sys.time()
-    print(glue("Time taken for year {year}: {round(difftime(end_time, start_time, units='mins'),1)} mins."))
+    print(glue::glue("Time taken for year {year}: {round(difftime(end_time, start_time, units='mins'),1)} mins."))
   }
 
-  if (!is.null(r_output_path)) {
-    # Save the table to a R data file
-    query <- tbl(conn, output_table_name)
-    data <- collect(query)
-    saveRDS(data, glue("{r_output_path}/{tolower(output_table_name)}.RDS"))
-  }
+  query <- dplyr::tbl(conn, output_table_name)
+  consultations <- collect(query)
 
-  dbDisconnect(conn)
+  DBI::dbDisconnect(conn)
+  return(consultations)
 }

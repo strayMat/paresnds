@@ -32,6 +32,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0),
+    RSQLite (>= 2.3.7)
 VignetteBuilder: knitr
 URL: https://straymat.github.io/paresnds/
+Config/testthat/edition: 3
