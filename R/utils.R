@@ -7,14 +7,13 @@
 #'
 #' @export
 initialize_connection <- function() {
-
   # Teste que l'on est sur le portail.
-  if (file.exists("~/sasdata1")){
+  if (file.exists("~/sasdata1")) {
     drv <- DBI::dbDriver("Oracle")
     conn <- DBI::dbConnect(drv, dbname = "IPIAMPR2.WORLD")
     Sys.setenv(TZ = "Europe/Paris")
     Sys.setenv(ORA_SDTZ = "Europe/Paris")
-  } else{
+  } else {
     print("Le code ne s'exécute pas sur le portail CNAM. Initialisation d'une connexion duckdb en mémoire.")
     conn <- DBI::dbConnect(duckdb::duckdb(), ":memory:")
   }

@@ -7,8 +7,9 @@
 initialize_connection()
 }
 \value{
-Connexion à la base de données
+dbConnection Connexion à la base de données oracle
 }
 \description{
-Initialisation de la connexion à la base de données.
+Si le code s'exécute en dehors du portail, initie une connexion sqlite pour
+effectuer les tests.
 }
