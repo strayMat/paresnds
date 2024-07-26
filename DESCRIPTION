@@ -11,8 +11,7 @@ Imports:
     haven,
     here,
     lubridate,
-    stringr,
-    duckdb (>= 1.0.0.2)
+    stringr
 Authors@R: c(
     person(
         "Antoine", "Belloir", ,
@@ -35,7 +34,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    RSQLite (>= 2.3.7)
+    duckdb (>= 1.0.0.2)
 VignetteBuilder: knitr
 URL: https://straymat.github.io/paresnds/
 Config/testthat/edition: 3

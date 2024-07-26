@@ -9,6 +9,7 @@
 initialize_connection <- function() {
   # Teste que l'on est sur le portail.
   if (file.exists("~/sasdata1")) {
+    require(ROracle)
     drv <- DBI::dbDriver("Oracle")
     conn <- DBI::dbConnect(drv, dbname = "IPIAMPR2.WORLD")
     Sys.setenv(TZ = "Europe/Paris")

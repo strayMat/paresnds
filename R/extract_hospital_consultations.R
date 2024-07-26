@@ -24,7 +24,8 @@
 #' @param conn dbConnection La connexion à la base de données. Si `conn` n'est pas fourni, une connexion à la base de données est initialisée.
 #'
 #' @return Un data.frame contenant les consultations. Les colonnes sont les suivantes :
-#' - BEN_IDT_ANO : Identifiant bénéficiaire anonymisé
+#' - BEN_IDT_ANO : Identifiant bénéficiaire anonymisé (seulement si patient_ids non nul)
+#' - NIR_ANO_17 : NIR anonymisé
 #' - EXE_SOI_DTD : Date de la délivrance
 #' - ACT_COD : Code de l'acte
 #' - EXE_SPE : Code de spécialité du professionnel de soin prescripteur
@@ -114,10 +115,13 @@ extract_hospital_consultations <- function(
       patient_ids_table <- tbl(conn, patient_ids_table_name)
       query <- patient_ids_table %>%
         inner_join(ace, by = c("BEN_NIR_PSA" = "NIR_ANO_17"))
+      selected_columns <- c("BEN_IDT_ANO", "NIR_ANO_17", "EXE_SOI_DTD", "ACT_COD", "EXE_SPE")
+    } else {
+      query <- ace
+      selected_columns <- c("NIR_ANO_17", "EXE_SOI_DTD", "ACT_COD", "EXE_SPE")
     }
-
     query <- query %>%
-      select(BEN_IDT_ANO, EXE_SOI_DTD, ACT_COD, EXE_SPE) %>%
+      select(all_of(selected_columns)) %>%
       distinct()
 
 
